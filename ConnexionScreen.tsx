@@ -3,16 +3,21 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView, 
+  SafeAreaView,
   TouchableOpacity,
   ImageBackground,
   TextInput,
   Image,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Feather'; 
-import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { RootStackParamList } from './App'; 
+import Icon from 'react-native-vector-icons/Feather';
+import { NavigationProp, useNavigation, CommonActions } from '@react-navigation/native';
+import { RootStackParamList } from './App';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const API_BASE_URL = 'http://192.168.1.3:8000';
 
 type ConnexionScreenNavigationProp = NavigationProp<RootStackParamList, 'Connexion'>;
 
@@ -20,42 +25,70 @@ const ConnexionScreen = () => {
   const navigation = useNavigation<ConnexionScreenNavigationProp>();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
-          const handleLogin = () => {
-    // 1. Valider que les champs ne sont pas vides
+  const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert('Erreur', 'Veuillez remplir tous les champs.');
       return;
     }
 
-    // 2. Vérifier les identifiants de l'agent
-        // 2. Vérifier les identifiants de l'admin
-    if (email.toLowerCase() === 'admin@cms.sn' && password === 'password') {
-      navigation.navigate('AdminFlow');
-      return;
+    setLoading(true);
+
+    console.log(`Attempting login with: ${email}`);
+    const body = `username=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`;
+
+    try {
+      const response = await axios.post(`${API_BASE_URL}/auth/login`, body, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      });
+
+      const { access_token, user } = response.data;
+
+      await AsyncStorage.setItem('userToken', access_token);
+
+      if (user.role === 'admin' || user.role === 'superadmin') {
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{ name: 'AdminFlow' }],
+          })
+        );
+      } else if (user.role === 'agent_support') {
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{ name: 'AgentFlow' }],
+          })
+        );
+      } else {
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{ name: 'Dashboard' }],
+          })
+        );
+      }
+    } catch (error) {
+      console.error('Login Error:', error);
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        Alert.alert('Erreur de connexion', 'Email ou mot de passe incorrect.');
+      } else {
+        Alert.alert('Erreur', 'Impossible de se connecter au serveur. Vérifiez votre connexion.');
+      }
+    } finally {
+      setLoading(false);
     }
-
-    // 3. Vérifier les identifiants de l'agent
-    if (email.toLowerCase() === 'agent.support@cms.sn' && password === 'password') {
-      // Si c'est l'agent, naviguer vers son interface et arrêter la fonction
-      navigation.navigate('AgentFlow');
-      return;
-    }
-
-    // 4. Si ce n'est ni l'admin ni l'agent, continuer le flux normal pour le client
-    Alert.alert(
-      'Connexion Client',
-      `Email: ${email}\nMot de passe: ${password}`,
-    );
-
-    // Naviguer vers le tableau de bord client
-    navigation.navigate('Dashboard');
   };
+
   return (
     <ImageBackground
       source={require('./assets/connexion.jpg')}
       resizeMode="cover"
-      style={styles.background}>
+      style={styles.background}
+    >
       <SafeAreaView style={styles.container}>
         <View style={styles.formContainer}>
           <View style={styles.header}>
@@ -106,8 +139,13 @@ const ConnexionScreen = () => {
 
           <TouchableOpacity
             style={styles.loginButton}
-            onPress={handleLogin}>
-            <Text style={styles.loginButtonText}>Se connecter</Text>
+            onPress={handleLogin}
+            disabled={loading}>
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.loginButtonText}>Se connecter</Text>
+            )}
           </TouchableOpacity>
 
           <View style={styles.signupContainer}>
