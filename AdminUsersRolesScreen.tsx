@@ -4,6 +4,7 @@ import Icon from 'react-native-vector-icons/Feather';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import UserForm, { UserFormData } from './UserForm';
+import { API_BASE_URL } from './config';
 
 // Define the structure of a User object for TypeScript
 interface User {
@@ -15,7 +16,7 @@ interface User {
 }
 
 // IMPORTANT: Replace with your actual backend URL
-const API_BASE_URL = 'http://192.168.1.3:8000';
+
 
 const getRoleStyle = (role: string) => {
   switch (role?.toLowerCase()) {

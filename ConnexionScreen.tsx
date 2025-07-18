@@ -13,11 +13,12 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { NavigationProp, useNavigation, CommonActions } from '@react-navigation/native';
+import { API_BASE_URL } from './config';
 import { RootStackParamList } from './App';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_BASE_URL = 'http://192.168.1.3:8000';
+
 
 type ConnexionScreenNavigationProp = NavigationProp<RootStackParamList, 'Connexion'>;
 

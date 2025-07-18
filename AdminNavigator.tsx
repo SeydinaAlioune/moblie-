@@ -58,6 +58,7 @@ const AdminNavigator = () => {
     <Drawer.Navigator
       drawerContent={(props) => <CustomDrawerContent {...props} />}
       screenOptions={({ navigation, route }) => ({
+        unmountOnBlur: true,
         drawerStyle: {
           width: 250, // Reduced width
           backgroundColor: '#0A192F',
