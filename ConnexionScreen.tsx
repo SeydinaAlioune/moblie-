@@ -29,13 +29,20 @@ const ConnexionScreen = () => {
     }
 
     // 2. Vérifier les identifiants de l'agent
+        // 2. Vérifier les identifiants de l'admin
+    if (email.toLowerCase() === 'admin@cms.sn' && password === 'password') {
+      navigation.navigate('AdminFlow');
+      return;
+    }
+
+    // 3. Vérifier les identifiants de l'agent
     if (email.toLowerCase() === 'agent.support@cms.sn' && password === 'password') {
       // Si c'est l'agent, naviguer vers son interface et arrêter la fonction
       navigation.navigate('AgentFlow');
       return;
     }
 
-    // 3. Si ce n'est pas l'agent, continuer le flux normal pour le client
+    // 4. Si ce n'est ni l'admin ni l'agent, continuer le flux normal pour le client
     Alert.alert(
       'Connexion Client',
       `Email: ${email}\nMot de passe: ${password}`,

@@ -14,6 +14,7 @@ import ChatScreen from './ChatScreen';
 import ConnexionScreen from './ConnexionScreen';
 import DashboardScreen from './DashboardScreen'; // Importer le nouvel écran
 import AgentNavigator from './AgentNavigator';
+import AdminNavigator from './AdminNavigator';
 
 // On définit ici la liste de tous les écrans et les paramètres qu'ils peuvent recevoir.
 // Cela garantit que l'on ne peut pas se tromper en naviguant.
@@ -23,6 +24,7 @@ export type RootStackParamList = {
   Connexion: undefined; // Ajouter l'écran de connexion
   Dashboard: undefined;
   AgentFlow: undefined; // Le flux de navigation de l'agent
+  AdminFlow: undefined; // Le flux de navigation de l'admin
 };
 
 // Crée un navigateur de type "Stack"
@@ -38,6 +40,7 @@ function App(): React.JSX.Element {
         <Stack.Screen name="Dashboard" component={DashboardScreen} />
         <Stack.Screen name="Chat" component={ChatScreen} />
         <Stack.Screen name="AgentFlow" component={AgentNavigator} />
+        <Stack.Screen name="AdminFlow" component={AdminNavigator} />
         {/* Nous ajouterons d'autres écrans ici plus tard */}
       </Stack.Navigator>
     </NavigationContainer>
