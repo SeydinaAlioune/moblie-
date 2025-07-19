@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, Alert, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
-import { pick } from '@react-native-documents/picker';
+import DocumentPicker from '@react-native-documents/picker';
 import axios from 'axios';
 import { API_BASE_URL } from './config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -40,7 +40,7 @@ const AdminKnowledgeBaseScreen = () => {
 
   const handleUpload = async () => {
     try {
-            const [res] = await pick({
+            const [res] = await DocumentPicker.pick({
         type: ['application/pdf', 'application/json'],
       });
 
