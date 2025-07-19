@@ -36,11 +36,10 @@ const ConnexionScreen = () => {
 
     setLoading(true);
 
-    console.log(`Attempting login with: ${email}`);
     const body = `username=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`;
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/auth/login`, body, {
+      const response = await axios.post(`${API_BASE_URL}/api/auth/login`, body, {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, Alert, ActivityIndicator, Platform, PermissionsAndroid } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
-import DocumentPicker from '@react-native-documents/picker';
+import * as DocumentPicker from '@react-native-documents/picker';
 import axios from 'axios';
 import { API_BASE_URL } from './config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -39,6 +39,8 @@ const AdminKnowledgeBaseScreen = () => {
   }, [fetchDocuments]);
 
   const handleUpload = async () => {
+
+
     try {
             const [res] = await DocumentPicker.pick({
         type: ['application/pdf', 'application/json'],
@@ -63,9 +65,23 @@ const AdminKnowledgeBaseScreen = () => {
       Alert.alert('Succès', 'Fichier téléversé avec succès.');
       fetchDocuments(); // Rafraîchir la liste
     } catch (err) {
-      // The new library throws an error on cancellation, which is caught here.
-      // We log it but don't show an alert to the user, preserving the original behavior.
-      console.log('Picker was cancelled or failed', err);
+      if (DocumentPicker.isErrorWithCode(err)) {
+        switch (err.code) {
+          case DocumentPicker.errorCodes.OPERATION_CANCELED:
+            // L'utilisateur a annulé la sélection, ne rien faire.
+            console.log('User cancelled the picker');
+            break;
+          default:
+            // Une autre erreur s'est produite.
+            console.error('Unknown error', err);
+            Alert.alert('Erreur', 'Une erreur est survenue lors de la sélection du fichier.');
+            break;
+        }
+      } else {
+        // Erreur inattendue
+        console.error('Unknown error', err);
+        Alert.alert('Erreur', 'Une erreur inattendue est survenue.');
+      }
     } finally {
       setIsUploading(false);
     }
