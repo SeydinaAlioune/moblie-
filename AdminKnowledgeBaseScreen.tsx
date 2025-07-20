@@ -22,7 +22,7 @@ const AdminKnowledgeBaseScreen = () => {
   const fetchDocuments = useCallback(async () => {
     setLoading(true);
     try {
-      const token = await AsyncStorage.getItem('userToken');
+      const token = await AsyncStorage.getItem('token');
       const response = await axios.get(`${API_BASE_URL}/kb/documents`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -54,7 +54,7 @@ const AdminKnowledgeBaseScreen = () => {
         name: res.name,
       });
 
-      const token = await AsyncStorage.getItem('userToken');
+      const token = await AsyncStorage.getItem('token');
       await axios.post(`${API_BASE_URL}/kb/upload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -97,7 +97,7 @@ const AdminKnowledgeBaseScreen = () => {
           text: 'Supprimer',
           onPress: async () => {
             try {
-              const token = await AsyncStorage.getItem('userToken');
+              const token = await AsyncStorage.getItem('token');
               await axios.delete(`${API_BASE_URL}/kb/documents/${docId}`, {
                 headers: { Authorization: `Bearer ${token}` },
               });
@@ -116,7 +116,7 @@ const AdminKnowledgeBaseScreen = () => {
   const handleReindex = async () => {
     setIsReindexing(true);
     try {
-        const token = await AsyncStorage.getItem('userToken');
+        const token = await AsyncStorage.getItem('token');
         await axios.post(`${API_BASE_URL}/kb/reindex`, {}, {
             headers: { Authorization: `Bearer ${token}` },
         });

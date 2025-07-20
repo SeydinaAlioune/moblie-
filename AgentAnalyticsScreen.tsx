@@ -1,5 +1,8 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_BASE_URL } from './config';
 import Icon from 'react-native-vector-icons/Feather';
 
 type StatCardProps = {
@@ -18,15 +21,87 @@ const StatCard: React.FC<StatCardProps> = ({ icon, title, value, color }) => (
 );
 
 const AgentAnalyticsScreen = () => {
+  const [stats, setStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // State for summary feature
+  const [summaryTicketId, setSummaryTicketId] = useState('');
+  const [summaryLoading, setSummaryLoading] = useState(false);
+
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const token = await AsyncStorage.getItem('token');
+        if (!token) {
+          throw new Error("Token non trouvé");
+        }
+
+        const response = await axios.get(`${API_BASE_URL}/glpi/stats`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        setStats(response.data);
+      } catch (err) {
+        setError("Impossible de charger les statistiques.");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
+  const handleGenerateSummary = async () => {
+    if (!summaryTicketId.trim()) {
+      Alert.alert("Erreur", "Veuillez entrer un ID de ticket.");
+      return;
+    }
+    setSummaryLoading(true);
+    try {
+      const token = await AsyncStorage.getItem('token');
+      const response = await axios.post(`${API_BASE_URL}/ai/summarize_ticket`,
+        { ticket_id: parseInt(summaryTicketId, 10) },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      Alert.alert("Résumé du Ticket", response.data.summary || "Aucun résumé disponible.");
+    } catch (err) {
+      console.error(err);
+      Alert.alert("Erreur", "Impossible de générer le résumé. Vérifiez l'ID du ticket et réessayez.");
+    } finally {
+      setSummaryLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.centerContent]}>
+        <ActivityIndicator size="large" color="#003366" />
+        <Text style={{ marginTop: 10 }}>Chargement des analyses...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={[styles.container, styles.centerContent]}>
+        <Icon name="alert-circle" size={40} color="#e60000" />
+        <Text style={{ marginTop: 10, color: '#e60000' }}>{error}</Text>
+      </View>
+    );
+  }
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
       <Text style={styles.headerTitle}>Analyse IA</Text>
 
       {/* Summary Cards */}
       <View style={styles.cardsContainer}>
-        <StatCard icon="inbox" title="Tickets reçus" value="128" color="#003366" />
-        <StatCard icon="repeat" title="Problèmes récurrents" value="12" color="#e60000" />
-        <StatCard icon="file-text" title="Rapports automatiques" value="28" color="#ff8f00" />
+        <StatCard icon="inbox" title="Tickets reçus" value={stats?.total_tickets ?? '...'} color="#003366" />
+        <StatCard icon="repeat" title="Problèmes récurrents" value={stats?.recurring_problems ?? '...'} color="#e60000" />
+        <StatCard icon="file-text" title="Rapports automatiques" value={stats?.automatic_reports ?? '...'} color="#ff8f00" />
       </View>
 
       {/* Main Chart Placeholder */}
@@ -49,9 +124,16 @@ const AgentAnalyticsScreen = () => {
                 style={styles.summaryInput}
                 placeholder="Entrez l'ID du ticket"
                 placeholderTextColor="#999"
+                keyboardType="numeric"
+                value={summaryTicketId}
+                onChangeText={setSummaryTicketId}
             />
-            <TouchableOpacity style={styles.summaryButton}>
-                <Text style={styles.summaryButtonText}>Générer le Résumé</Text>
+            <TouchableOpacity style={styles.summaryButton} onPress={handleGenerateSummary} disabled={summaryLoading}>
+                                {summaryLoading ? (
+                    <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                    <Text style={styles.summaryButtonText}>Générer le Résumé</Text>
+                )}
             </TouchableOpacity>
         </View>
       </View>
@@ -60,6 +142,10 @@ const AgentAnalyticsScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  centerContent: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   container: {
     flex: 1,
     backgroundColor: '#f0f2f5',

@@ -21,7 +21,7 @@ const AdminMiddlewareConfigScreen = () => {
 
   // Fonction pour créer une instance axios avec le token d'authentification
   const getAuthorizedAxios = async () => {
-    const token = await AsyncStorage.getItem('userToken');
+    const token = await AsyncStorage.getItem('token');
     if (!token) {
       Alert.alert("Erreur d'authentification", "Votre session a expiré. Veuillez vous reconnecter.");
       // Ici, vous pourriez implémenter une navigation vers l'écran de connexion

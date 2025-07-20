@@ -42,7 +42,7 @@ const AdminUsersRolesScreen = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const token = await AsyncStorage.getItem('userToken');
+      const token = await AsyncStorage.getItem('token');
       if (!token) throw new Error('Authentication token not found.');
 
       const response = await axios.get(`${API_BASE_URL}/admin/users`, {
@@ -64,7 +64,7 @@ const AdminUsersRolesScreen = () => {
 
   const handleAddUser = async (data: UserFormData) => {
     try {
-      const token = await AsyncStorage.getItem('userToken');
+      const token = await AsyncStorage.getItem('token');
       if (!data.name || !data.email || !data.password) {
         Alert.alert('Erreur', 'Veuillez remplir tous les champs.');
         return;
@@ -96,7 +96,7 @@ const AdminUsersRolesScreen = () => {
           text: 'Supprimer',
           onPress: async () => {
             try {
-              const token = await AsyncStorage.getItem('userToken');
+              const token = await AsyncStorage.getItem('token');
               await axios.delete(`${API_BASE_URL}/admin/users/${userId}`, {
                 headers: { Authorization: `Bearer ${token}` },
               });
@@ -119,7 +119,7 @@ const AdminUsersRolesScreen = () => {
     if (!editingUser) return;
 
     try {
-      const token = await AsyncStorage.getItem('userToken');
+      const token = await AsyncStorage.getItem('token');
       const response = await axios.put(`${API_BASE_URL}/admin/users/${editingUser.id}`, data, {
         headers: { Authorization: `Bearer ${token}` },
       });

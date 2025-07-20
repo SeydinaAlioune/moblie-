@@ -16,15 +16,16 @@ const AdminGlpiConfigScreen = () => {
     const fetchConfig = async () => {
       setLoading(true);
       try {
-        const token = await AsyncStorage.getItem('userToken');
+        const token = await AsyncStorage.getItem('token');
         const response = await axios.get(`${API_BASE_URL}/config/glpi`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         // L'API ne retourne que l'URL pour des raisons de sécurité
         setApiUrl(response.data.GLPI_API_URL || '');
-      } catch (error) {
+      } catch (error: any) {
         console.error('Erreur de chargement config:', error);
-        Alert.alert('Erreur', 'Impossible de charger la configuration GLPI.');
+        const detail = error.response?.data?.detail || 'Impossible de charger la configuration GLPI.';
+        Alert.alert('Erreur de chargement', detail);
       } finally {
         setLoading(false);
       }
@@ -41,7 +42,7 @@ const AdminGlpiConfigScreen = () => {
 
     setLoading(true);
     try {
-      const token = await AsyncStorage.getItem('userToken');
+      const token = await AsyncStorage.getItem('token');
       // Le backend attend un objet avec ces clés spécifiques
       const payload = {
         GLPI_API_URL: apiUrl,

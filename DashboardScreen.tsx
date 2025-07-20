@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from './App'; // Assurez-vous que ce type est exporté depuis App.tsx
 import {
@@ -15,7 +16,19 @@ import Icon from 'react-native-vector-icons/Feather'; // Reverted to fix visibil
 
 const DashboardScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const userName = 'Marie Dupont'; // Nom d'utilisateur en dur pour l'exemple
+  const [userName, setUserName] = useState('Client'); // Valeur par défaut
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const userDataString = await AsyncStorage.getItem('user');
+      if (userDataString) {
+        const userData = JSON.parse(userDataString);
+        setUserName(userData.name || 'Client');
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   const frequentQuestions = [
     {

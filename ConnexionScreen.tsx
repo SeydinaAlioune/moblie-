@@ -47,7 +47,8 @@ const ConnexionScreen = () => {
 
       const { access_token, user } = response.data;
 
-      await AsyncStorage.setItem('userToken', access_token);
+      await AsyncStorage.setItem('token', access_token);
+      await AsyncStorage.setItem('user', JSON.stringify(user)); // Sauvegarde les infos de l'utilisateur
 
       if (user.role === 'admin' || user.role === 'superadmin') {
         navigation.dispatch(
